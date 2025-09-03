@@ -9,11 +9,19 @@
  * Note: The app will work without the API key using smart fallback images
  */
 
+// Safely access environment variables in Vite
+const getEnvVar = (key: string): string | undefined => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key];
+  }
+  return undefined;
+};
+
 export const CONFIG = {
   // Optional: Add your Unsplash Access Key here to use live image search
   // If not provided, the app will use curated fallback images based on content
   UNSPLASH_ACCESS_KEY:
-    process.env.VITE_UNSPLASH_ACCESS_KEY ||
+    getEnvVar('VITE_UNSPLASH_ACCESS_KEY') ||
     "BOqWktAn985EwhqoO1WDc04WKKW5bsEhxCElpPTrM7g",
 
   // API URLs

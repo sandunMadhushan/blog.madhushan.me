@@ -28,12 +28,12 @@ export class MediumService {
   private static readonly MEDIUM_RSS_URL = CONFIG.MEDIUM_RSS_URL;
 
   static async fetchPosts(): Promise<MediumPost[]> {
-    console.log('Fetching Medium posts...');
+    console.log("Fetching Medium posts...");
     try {
       const response = await fetch(this.MEDIUM_RSS_URL);
       const data: MediumRSSResponse = await response.json();
 
-      console.log('Medium API response:', data);
+      console.log("Medium API response:", data);
 
       if (data.status !== "ok") {
         throw new Error("Failed to fetch Medium posts");
@@ -50,7 +50,10 @@ export class MediumService {
           // If no image found in the post, get a relevant one based on title and tags
           let image = extractedImage;
           if (!image) {
-            console.log(`No image found, getting smart image for: ${item.title} with tags:`, tags);
+            console.log(
+              `No image found, getting smart image for: ${item.title} with tags:`,
+              tags
+            );
             image = await ImageService.getImageForArticle(item.title, tags);
             console.log(`Smart image result: ${image}`);
           }
@@ -67,11 +70,11 @@ export class MediumService {
         })
       );
 
-      console.log('Final posts with images:', posts);
+      console.log("Final posts with images:", posts);
       return posts;
     } catch (error) {
       console.error("Error fetching Medium posts:", error);
-      console.log('Using fallback posts...');
+      console.log("Using fallback posts...");
       return await this.getFallbackPosts();
     }
   }

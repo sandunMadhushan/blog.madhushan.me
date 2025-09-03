@@ -18,4 +18,8 @@ export default defineConfig(({ mode }: { mode: string }) => ({
       "@": path.resolve(process.cwd(), "./src"),
     },
   },
+  define: {
+    // Define process.env for the browser
+    'process.env': {}
+  },
 }));
