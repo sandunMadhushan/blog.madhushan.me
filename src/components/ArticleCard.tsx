@@ -8,11 +8,13 @@ interface ArticleCardProps {
   readTime: string;
   tags: string[];
   image: string;
+  link: string;
 }
 
-const ArticleCard = ({ title, excerpt, date, readTime, tags, image }: ArticleCardProps) => {
+const ArticleCard = ({ title, excerpt, date, readTime, tags, image, link }: ArticleCardProps) => {
   return (
     <article className="group bg-card rounded-2xl overflow-hidden blog-shadow-md hover:blog-shadow-lg blog-transition border border-border/50">
+      <a href={link} target="_blank" rel="noopener noreferrer" className="block">
       <div className="aspect-[16/10] overflow-hidden">
         <img 
           src={image}
@@ -49,6 +51,7 @@ const ArticleCard = ({ title, excerpt, date, readTime, tags, image }: ArticleCar
           ))}
         </div>
       </div>
+      </a>
     </article>
   );
 };

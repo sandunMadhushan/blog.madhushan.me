@@ -1,58 +1,49 @@
 import { Button } from "@/components/ui/button";
 import ArticleCard from "./ArticleCard";
+import { useEffect, useState } from "react";
+import { MediumService } from "@/services/mediumService";
 
-const articles = [
-  {
-    title: "Mastering React Hooks: Lessons from Building 10 Projects",
-    excerpt: "How I went from React beginner to confident hooks user through practical project-based learning.",
-    date: "May 15, 2023",
-    readTime: "8 min read",
-    tags: ["React", "JavaScript"],
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  },
-  {
-    title: "Data Structures Every CS Student Should Master",
-    excerpt: "A practical guide to the most important data structures and when to use them in real-world applications.",
-    date: "April 28, 2023",
-    readTime: "12 min read",
-    tags: ["Algorithms", "Computer Science"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  },
-  {
-    title: "Building My First Fullstack App: Challenges & Breakthroughs",
-    excerpt: "The journey of creating a complete MERN stack application as a student developer - what worked and what didn't.",
-    date: "April 10, 2023",
-    readTime: "10 min read",
-    tags: ["MERN", "Fullstack"],
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  },
-  {
-    title: "TypeScript Best Practices for Large Projects",
-    excerpt: "Essential TypeScript patterns and practices I learned while working on enterprise-level applications.",
-    date: "March 22, 2023",
-    readTime: "7 min read",
-    tags: ["TypeScript", "Best Practices"],
-    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  },
-  {
-    title: "API Design: RESTful Principles in Practice",
-    excerpt: "Real-world examples of designing clean, maintainable APIs that follow REST architectural constraints.",
-    date: "March 8, 2023",
-    readTime: "9 min read",
-    tags: ["API", "Backend"],
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  },
-  {
-    title: "The Power of Git: Advanced Workflows for Teams",
-    excerpt: "Beyond basic commits: branching strategies, merge vs rebase, and collaborative workflows that actually work.",
-    date: "February 18, 2023",
-    readTime: "11 min read",
-    tags: ["Git", "Team Workflow"],
-    image: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-  }
-];
+interface MediumPost {
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+  tags: string[];
+  image: string;
+  link: string;
+}
 
 const ArticleGrid = () => {
+  const [articles, setArticles] = useState<MediumPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const posts = await MediumService.fetchPosts();
+        setArticles(posts);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blog-blue"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
