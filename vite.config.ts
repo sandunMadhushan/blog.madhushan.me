@@ -20,6 +20,6 @@ export default defineConfig(({ mode }: { mode: string }) => ({
   },
   define: {
     // Define process.env for the browser
-    'process.env': {}
+    "process.env": {},
   },
 }));
