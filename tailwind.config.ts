@@ -61,7 +61,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				'blog-blue': {
+					DEFAULT: 'hsl(var(--blog-blue))',
+					light: 'hsl(var(--blog-blue-light))',
+					dark: 'hsl(var(--blog-blue-dark))'
 				}
+			},
+			fontFamily: {
+				'blog-heading': 'var(--blog-heading)',
+				'blog-body': 'var(--blog-body)'
+			},
+			boxShadow: {
+				'blog-sm': 'var(--blog-shadow-sm)',
+				'blog-md': 'var(--blog-shadow-md)',
+				'blog-lg': 'var(--blog-shadow-lg)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

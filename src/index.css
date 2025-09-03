@@ -17,8 +17,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 221 100% 62%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -34,7 +34,26 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221 100% 62%;
+
+    /* Custom design tokens for blog */
+    --blog-blue: 221 100% 62%;
+    --blog-blue-light: 221 100% 85%;
+    --blog-blue-dark: 221 100% 45%;
+    --blog-gradient: linear-gradient(135deg, hsl(var(--blog-blue)), hsl(var(--blog-blue-light)));
+    --blog-hero-gradient: linear-gradient(135deg, hsl(221 100% 62%), hsl(221 100% 75%));
+    
+    /* Typography */
+    --blog-heading: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --blog-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Shadows */
+    --blog-shadow-sm: 0 1px 3px 0 hsl(var(--blog-blue) / 0.1);
+    --blog-shadow-md: 0 4px 6px -1px hsl(var(--blog-blue) / 0.1);
+    --blog-shadow-lg: 0 10px 15px -3px hsl(var(--blog-blue) / 0.1);
+    
+    /* Animations */
+    --blog-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
 
@@ -65,8 +84,8 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 221 100% 70%;
+    --primary-foreground: 222.2 84% 4.9%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -82,7 +101,18 @@ All colors MUST be HSL.
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 221 100% 70%;
+
+    /* Dark mode overrides */
+    --blog-blue: 221 100% 70%;
+    --blog-blue-light: 221 100% 80%;
+    --blog-blue-dark: 221 100% 55%;
+    --blog-gradient: linear-gradient(135deg, hsl(var(--blog-blue)), hsl(var(--blog-blue-light)));
+    --blog-hero-gradient: linear-gradient(135deg, hsl(221 100% 70%), hsl(221 100% 80%));
+    
+    --blog-shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
+    --blog-shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3);
+    --blog-shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -101,5 +131,36 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--blog-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--blog-heading);
+  }
+}
+
+@layer utilities {
+  .blog-gradient {
+    background: var(--blog-gradient);
+  }
+  
+  .blog-hero-gradient {
+    background: var(--blog-hero-gradient);
+  }
+  
+  .blog-shadow-sm {
+    box-shadow: var(--blog-shadow-sm);
+  }
+  
+  .blog-shadow-md {
+    box-shadow: var(--blog-shadow-md);
+  }
+  
+  .blog-shadow-lg {
+    box-shadow: var(--blog-shadow-lg);
+  }
+  
+  .blog-transition {
+    transition: var(--blog-transition);
   }
 }
