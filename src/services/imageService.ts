@@ -65,40 +65,30 @@ export class ImageService {
     title: string,
     tags: string[] = []
   ): Promise<string> {
-    console.log(`ImageService: Getting image for "${title}" with tags:`, tags);
-
     const cacheKey = `${title}-${tags.join(",")}`;
     if (this.imageCache.has(cacheKey)) {
       const cachedImage = this.imageCache.get(cacheKey)!;
-      console.log(`ImageService: Found cached image: ${cachedImage}`);
       return cachedImage;
     }
 
+    // Always try topic-based images first for better reliability
+    const topicImage = this.getTopicBasedImage(title, tags);
+
     try {
       if (CONFIG.UNSPLASH_ACCESS_KEY) {
-        console.log("ImageService: Attempting Unsplash API search...");
         const unsplashImage = await this.searchUnsplashImage(title, tags);
         if (unsplashImage) {
-          console.log(`ImageService: Got Unsplash image: ${unsplashImage}`);
           this.imageCache.set(cacheKey, unsplashImage);
           return unsplashImage;
         }
-      } else {
-        console.log(
-          "ImageService: No Unsplash API key, using topic-based images"
-        );
       }
 
-      const topicImage = this.getTopicBasedImage(title, tags);
-      console.log(`ImageService: Using topic-based image: ${topicImage}`);
       this.imageCache.set(cacheKey, topicImage);
       return topicImage;
     } catch (error) {
       console.error("ImageService: Error getting image for article:", error);
-      const fallbackImage = this.topicImages.default;
-      console.log(`ImageService: Using default fallback: ${fallbackImage}`);
-      this.imageCache.set(cacheKey, fallbackImage);
-      return fallbackImage;
+      this.imageCache.set(cacheKey, topicImage);
+      return topicImage;
     }
   }
 
@@ -110,6 +100,10 @@ export class ImageService {
       const searchTerms = this.extractSearchTerms(title, tags);
       const query = searchTerms.join(" ");
 
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
         `${CONFIG.UNSPLASH_API_URL}?query=${encodeURIComponent(
           query
@@ -118,22 +112,33 @@ export class ImageService {
           headers: {
             Authorization: `Client-ID ${CONFIG.UNSPLASH_ACCESS_KEY}`,
           },
+          signal: controller.signal,
         }
       );
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
+        console.error(
+          `ImageService: Unsplash API error: ${response.status} ${response.statusText}`
+        );
         throw new Error(`Unsplash API error: ${response.status}`);
       }
 
       const data: UnsplashResponse = await response.json();
 
       if (data.results && data.results.length > 0) {
-        return data.results[0].urls.regular;
+        const imageUrl = data.results[0].urls.regular;
+        return imageUrl;
       }
 
       return null;
     } catch (error) {
-      console.error("Error searching Unsplash:", error);
+      if (error instanceof Error && error.name === "AbortError") {
+        console.error("ImageService: Unsplash API request timed out");
+      } else {
+        console.error("ImageService: Error searching Unsplash:", error);
+      }
       return null;
     }
   }
