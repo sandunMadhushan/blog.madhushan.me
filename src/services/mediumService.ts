@@ -124,6 +124,8 @@ export class MediumService {
         date: "April 2, 2024",
         readTime: "8 min read",
         tags: ["Mobile Development", "Healthcare", "Android"],
+        image:
+          "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
         link: "https://sandunmadhushan.medium.com/developing-e-doc-a-mobile-app-for-remote-healthcare-access-087483f844f6",
       },
       {
@@ -134,6 +136,8 @@ export class MediumService {
         date: "March 25, 2024",
         readTime: "10 min read",
         tags: ["Web Development", "Education", "Full Stack"],
+        image:
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
         link: "https://sandunmadhushan.medium.com/educonnect-lms-ae18b5a440e4",
       },
       {
@@ -143,6 +147,8 @@ export class MediumService {
         date: "March 23, 2024",
         readTime: "12 min read",
         tags: ["AI", "Machine Learning", "Web Development"],
+        image:
+          "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
         link: "https://sandunmadhushan.medium.com/how-i-built-the-ai-powered-resume-analyzer-27bb82bbbb58",
       },
       {
@@ -153,16 +159,13 @@ export class MediumService {
         date: "August 21, 2023",
         readTime: "6 min read",
         tags: ["Personal Growth", "Motivation", "Life"],
+        image:
+          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
         link: "https://sandunmadhushan.medium.com/embracing-your-personal-average-a-journey-of-resilience-and-growth-41999838add9",
       },
     ];
 
-    // Add relevant images to fallback posts
-    return Promise.all(
-      fallbackPosts.map(async (post) => ({
-        ...post,
-        image: await ImageService.getImageForArticle(post.title, post.tags),
-      }))
-    );
+    // Return fallback posts with predefined images to avoid async issues
+    return fallbackPosts;
   }
 }

@@ -24,10 +24,12 @@ const ArticleGrid = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        console.log("ArticleGrid: Starting to fetch articles...");
         const posts = await MediumService.fetchPosts();
+        console.log("ArticleGrid: Received posts:", posts);
         setArticles(posts);
       } catch (error) {
-        console.error('Error fetching articles:', error);
+        console.error("ArticleGrid: Error fetching articles:", error);
       } finally {
         setLoading(false);
       }
@@ -43,7 +45,9 @@ const ArticleGrid = () => {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <Loader2 className="w-12 h-12 animate-spin text-yellow-400 mx-auto mb-4" />
-              <p className="text-muted-foreground text-lg">Loading amazing content...</p>
+              <p className="text-muted-foreground text-lg">
+                Loading amazing content...
+              </p>
             </div>
           </div>
         </div>
@@ -52,7 +56,10 @@ const ArticleGrid = () => {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-muted/20" id="articles">
+    <section
+      className="py-20 bg-gradient-to-b from-background to-muted/20"
+      id="articles"
+    >
       <div className="container mx-auto px-6">
         {/* Section header */}
         <div className="text-center mb-16">
@@ -60,7 +67,8 @@ const ArticleGrid = () => {
             Latest <span className="portfolio-text-gradient">Articles</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Dive into my thoughts on technology, career growth, and software development
+            Dive into my thoughts on technology, career growth, and software
+            development
           </p>
         </div>
 
@@ -88,22 +96,31 @@ const ArticleGrid = () => {
         </div>
 
         {/* Articles grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {articles.map((article, index) => (
-            <div
-              key={index}
-              className="opacity-0 animate-in fade-in-50 slide-in-from-bottom-4"
-              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-            >
-              <ArticleCard {...article} />
-            </div>
-          ))}
-        </div>
+        {articles.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {articles.map((article, index) => (
+              <div
+                key={index}
+                className={`animate-fade-in-up ${
+                  index < 6 ? `animate-delay-${index + 1}` : ""
+                }`}
+              >
+                <ArticleCard {...article} />
+              </div>
+            ))}
+          </div>
+        ) : !loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">
+              No articles found. Please check the console for any errors.
+            </p>
+          </div>
+        ) : null}
 
         {/* Load more button */}
         <div className="text-center">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="lg"
             className="border-2 border-border hover:border-yellow-400 hover:text-yellow-400 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition"
           >
