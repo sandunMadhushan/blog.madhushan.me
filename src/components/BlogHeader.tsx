@@ -51,21 +51,12 @@ const BlogHeader = () => {
               Sandun Madhushan
             </a>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Home
+              <a href="https://madhushan.me" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
+                ← Back to Portfolio
               </a>
               <a href="#" className="text-foreground font-semibold relative">
                 Blog
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-400"></span>
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Projects
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                About
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Contact
               </a>
             </div>
           </div>
@@ -95,20 +86,11 @@ const BlogHeader = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-border/50">
             <div className="flex flex-col space-y-4 pt-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Home
+              <a href="https://madhushan.me" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
+                ← Back to Portfolio
               </a>
               <a href="#" className="text-foreground font-semibold">
                 Blog
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Projects
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                About
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground portfolio-transition font-medium">
-                Contact
               </a>
             </div>
           </div>
