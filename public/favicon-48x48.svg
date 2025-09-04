@@ -1,0 +1,11 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient-48" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A202C"/>
+      <stop offset="100%" style="stop-color:#2D3748"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="url(#bg-gradient-48)"/>
+  <rect width="48" height="48" rx="12" fill="none" stroke="#F7DC6F" stroke-width="0.8" opacity="0.3"/>
+  <text x="24" y="32" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="800" fill="#F7DC6F" text-anchor="middle" letter-spacing="-1px">SM</text>
+</svg>
