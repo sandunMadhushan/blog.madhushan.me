@@ -33,6 +33,7 @@ const BlogFooter = () => {
                 href="https://github.com/sandunMadhushan"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit my GitHub profile"
                 className="w-12 h-12 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-yellow-400/50 hover:bg-yellow-400/10 portfolio-transition group"
               >
                 <Github className="w-5 h-5 group-hover:scale-110 portfolio-transition" />
@@ -41,6 +42,7 @@ const BlogFooter = () => {
                 href="https://www.linkedin.com/in/sandunmadhushan/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Connect with me on LinkedIn"
                 className="w-12 h-12 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-blue-400/50 hover:bg-blue-400/10 portfolio-transition group"
               >
                 <Linkedin className="w-5 h-5 group-hover:scale-110 portfolio-transition" />
@@ -49,12 +51,14 @@ const BlogFooter = () => {
                 href="https://twitter.com/sandunmadhushan"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Follow me on Twitter"
                 className="w-12 h-12 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-purple-400/50 hover:bg-purple-400/10 portfolio-transition group"
               >
                 <Twitter className="w-5 h-5 group-hover:scale-110 portfolio-transition" />
               </a>
               <a
                 href="mailto:contact@madhushan.me"
+                aria-label="Send me an email"
                 className="w-12 h-12 bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-green-400/50 hover:bg-green-400/10 portfolio-transition group"
               >
                 <Mail className="w-5 h-5 group-hover:scale-110 portfolio-transition" />
