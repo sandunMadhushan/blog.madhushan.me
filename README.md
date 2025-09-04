@@ -1,10 +1,10 @@
 # Madhushan's Blog
 
-This is the blog repository for [madhushan.me](https://madhushan.me) - a modern, responsive blog built with React and TypeScript.
+This is the official blog repository for [madhushan.me](https://madhushan.me) - a modern, responsive blog built with React and TypeScript.
 
 ## Project info
 
-This project showcases articles and content from Madhushan's personal blog, featuring a clean design and seamless user experience.
+This repository contains the source code for Madhushan's personal blog website at madhushan.me. The project showcases articles and content with a clean design and seamless user experience, featuring integration with Medium for content management.
 
 ## Development
 
@@ -18,10 +18,10 @@ You can run this blog locally using your preferred IDE. Here's how to get starte
 
 ```sh
 # Step 1: Clone the repository
-git clone https://github.com/sandunMadhushan/madhushan-reimagined-blog.git
+git clone https://github.com/sandunMadhushan/blog.madhushan.me.git
 
 # Step 2: Navigate to the project directory
-cd madhushan-reimagined-blog
+cd blog.madhushan.me
 
 # Step 3: Install dependencies
 npm install
