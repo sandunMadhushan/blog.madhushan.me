@@ -4,9 +4,9 @@ import { Search, ArrowDown } from "lucide-react";
 
 const BlogHero = () => {
   const scrollToArticles = () => {
-    const articlesSection = document.getElementById('articles');
+    const articlesSection = document.getElementById("articles");
     if (articlesSection) {
-      articlesSection.scrollIntoView({ behavior: 'smooth' });
+      articlesSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -24,18 +24,21 @@ const BlogHero = () => {
           {/* Main heading with gradient text */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="block text-foreground">Tech Insights &</span>
-            <span className="block portfolio-text-gradient">Developer Stories</span>
+            <span className="block portfolio-text-gradient">
+              Developer Stories
+            </span>
           </h1>
-          
+
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Sharing my journey as a software engineer through code, concepts, and experiences. 
-            Exploring the intersection of technology and innovation.
+            Sharing my journey as a software engineer through code, concepts,
+            and experiences. Exploring the intersection of technology and
+            innovation.
           </p>
 
           {/* Search bar */}
           <div className="max-w-md mx-auto mb-12 relative group">
-            <Input 
+            <Input
               placeholder="Search articles..."
               className="pl-12 h-14 text-lg border-2 border-border/50 focus:border-yellow-400 bg-card/50 backdrop-blur-sm portfolio-transition rounded-xl"
             />
@@ -44,23 +47,30 @@ const BlogHero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition"
             >
               Latest Articles
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="lg"
               className="border-2 border-border hover:border-yellow-400 hover:text-yellow-400 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition"
+              asChild
             >
-              About Me
+              <a
+                href="https://madhushan.me/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                About Me
+              </a>
             </Button>
           </div>
 
           {/* Scroll indicator */}
-          <button 
+          <button
             onClick={scrollToArticles}
             className="animate-bounce hover:text-yellow-400 portfolio-transition"
             aria-label="Scroll to articles"
