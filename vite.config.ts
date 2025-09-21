@@ -23,6 +23,7 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     "process.env": {},
   },
   build: {
+    sourcemap: false,
     rollupOptions: {
       external: [],
     },
