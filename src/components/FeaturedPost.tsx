@@ -1,8 +1,46 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MediumService } from "@/services/mediumService";
 import { ArrowRight, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface MediumPost {
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+  tags: string[];
+  image: string;
+  link: string;
+}
 
 const FeaturedPost = () => {
+  const [featuredPost, setFeaturedPost] = useState<MediumPost | null>(null);
+
+  useEffect(() => {
+    const fetchFeaturedPost = async () => {
+      try {
+        const posts = await MediumService.fetchPosts();
+        setFeaturedPost(posts[0] || null);
+      } catch (error) {
+        console.error("FeaturedPost: Error fetching featured post:", error);
+      }
+    };
+
+    fetchFeaturedPost();
+  }, []);
+
+  const title = featuredPost?.title ?? "From Classroom to";
+  const subtitle = featuredPost ? null : "Codebase";
+  const excerpt =
+    featuredPost?.excerpt ??
+    "How I'm bridging the gap between academic knowledge and real-world software engineering practices. A deep dive into the transition from student to professional developer.";
+  const tags = featuredPost?.tags ?? ["Career", "Learning", "Advice"];
+  const imageUrl =
+    featuredPost?.image ??
+    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+  const link = featuredPost?.link ?? "#";
+
   return (
     <section className="py-20 bg-gradient-to-br from-muted/30 to-background">
       <div className="container mx-auto px-6">
@@ -16,32 +54,36 @@ const FeaturedPost = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
           <div className="order-2 lg:order-1">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              From Classroom to 
-              <span className="portfolio-text-gradient block">Codebase</span>
+              {title}
+              {subtitle ? (
+                <span className="portfolio-text-gradient block">{subtitle}</span>
+              ) : null}
             </h2>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              How I'm bridging the gap between academic knowledge and real-world software engineering practices. 
-              A deep dive into the transition from student to professional developer.
+              {excerpt}
             </p>
             
             <div className="flex flex-wrap gap-3 mb-8">
-              <Badge variant="outline" className="border-yellow-400/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-400/10 px-4 py-2 text-sm">
-                Career
-              </Badge>
-              <Badge variant="outline" className="border-blue-400/30 text-blue-600 dark:text-blue-400 hover:bg-blue-400/10 px-4 py-2 text-sm">
-                Learning
-              </Badge>
-              <Badge variant="outline" className="border-purple-400/30 text-purple-600 dark:text-purple-400 hover:bg-purple-400/10 px-4 py-2 text-sm">
-                Advice
-              </Badge>
+              {tags.slice(0, 3).map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-yellow-400/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-400/10 px-4 py-2 text-sm"
+                >
+                  {tag}
+                </Badge>
+              ))}
             </div>
             
-            <Button 
-              size="lg" 
+            <Button
+              asChild
+              size="lg"
               className="bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition group"
             >
-              Read Full Story
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 portfolio-transition" />
+              <a href={link} target="_blank" rel="noreferrer">
+                Read Full Story
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 portfolio-transition" />
+              </a>
             </Button>
           </div>
           
@@ -52,9 +94,9 @@ const FeaturedPost = () => {
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"></div>
               
               <div className="aspect-[4/3] rounded-2xl overflow-hidden portfolio-shadow-lg relative group">
-                <img 
-                  src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-                  alt="Featured Post"
+                <img
+                  src={imageUrl}
+                  alt={title}
                   className="w-full h-full object-cover group-hover:scale-105 portfolio-transition"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 portfolio-transition"></div>
