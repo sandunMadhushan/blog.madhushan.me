@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = "/.netlify/functions/api";
 
 type RequestOptions = RequestInit & {
   params?: Record<string, string>;
