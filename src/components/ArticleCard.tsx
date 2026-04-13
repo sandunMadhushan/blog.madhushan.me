@@ -45,8 +45,8 @@ const ArticleCard = ({
     <article className="group bg-card/50 backdrop-blur-sm rounded-2xl overflow-hidden portfolio-shadow hover:portfolio-shadow-lg portfolio-transition border border-border/50 hover:border-yellow-400/30">
       <a
         href={link}
-        target="_blank"
-        rel="noopener noreferrer"
+        target={link.startsWith("http") ? "_blank" : undefined}
+        rel={link.startsWith("http") ? "noopener noreferrer" : undefined}
         className="block"
       >
         <div className="aspect-[16/10] overflow-hidden bg-muted relative">

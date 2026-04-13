@@ -1,11 +1,11 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MediumService } from "@/services/mediumService";
+import { ContentService } from "@/services/contentService";
 import { ArrowRight, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface MediumPost {
+interface FeedPost {
   title: string;
   excerpt: string;
   date: string;
@@ -16,15 +16,16 @@ interface MediumPost {
 }
 
 const FeaturedPost = () => {
-  const [featuredPost, setFeaturedPost] = useState<MediumPost | null>(null);
+  const [featuredPost, setFeaturedPost] = useState<FeedPost | null>(null);
 
   useEffect(() => {
     const fetchFeaturedPost = async () => {
       try {
-        const posts = await MediumService.fetchPosts();
-        setFeaturedPost(posts[0] || null);
+        const data = await ContentService.fetchFeed();
+        setFeaturedPost(data?.featured || null);
       } catch (error) {
         console.error("FeaturedPost: Error fetching featured post:", error);
+        setFeaturedPost(null);
       }
     };
 
@@ -81,7 +82,11 @@ const FeaturedPost = () => {
               size="lg"
               className="bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition group"
             >
-              <a href={link} target="_blank" rel="noreferrer">
+              <a
+                href={link}
+                target={link.startsWith("http") ? "_blank" : undefined}
+                rel={link.startsWith("http") ? "noreferrer" : undefined}
+              >
                 Read Full Story
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 portfolio-transition" />
               </a>

@@ -2,7 +2,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import ArticleCard from "./ArticleCard";
 import { useEffect, useState } from "react";
-import { MediumService } from "@/services/mediumService";
+import { ContentService } from "@/services/contentService";
 import { Loader2, Filter } from "lucide-react";
 
 interface MediumPost {
@@ -26,11 +26,12 @@ const ArticleGrid = () => {
     const fetchArticles = async () => {
       try {
         console.log("ArticleGrid: Starting to fetch articles...");
-        const posts = await MediumService.fetchPosts();
-        console.log("ArticleGrid: Received posts:", posts);
-        setArticles(posts);
+        const feed = await ContentService.fetchFeed();
+        console.log("ArticleGrid: Received posts:", feed.items);
+        setArticles(feed?.items ?? []);
       } catch (error) {
         console.error("ArticleGrid: Error fetching articles:", error);
+        setArticles([]);
       } finally {
         setLoading(false);
       }

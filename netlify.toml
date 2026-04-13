@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[functions."medium-sync"]
+  schedule = "0 */6 * * *"
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -49,6 +56,12 @@
   for = "/*.html"
   [headers.values]
     Cache-Control = "no-cache"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
