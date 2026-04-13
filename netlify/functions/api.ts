@@ -417,7 +417,9 @@ async function handlePublic(event: HandlerEvent, path: string): Promise<HandlerR
 
 export const handler: Handler = async (event) => {
   try {
-    const rawPath = event.path.replace(/^\/.netlify\/functions\/api/, "");
+    const rawPath = event.path
+      .replace(/^\/.netlify\/functions\/api/, "")
+      .replace(/^\/api/, "");
     const path = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
 
     if (path.startsWith("/admin")) {
