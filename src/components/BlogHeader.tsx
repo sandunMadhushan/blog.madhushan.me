@@ -9,24 +9,27 @@ const BlogHeader = () => {
   const lenis = useLenis();
 
   useEffect(() => {
-    if (lenis) {
-      const onLenisScroll = () => {
-        setIsScrolled(lenis.scroll > 50);
-      };
-      lenis.on("scroll", onLenisScroll);
-      onLenisScroll();
-
-      return () => {
-        lenis.off("scroll", onLenisScroll);
-      };
-    }
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    const updateScrolledState = () => {
+      const y = lenis ? lenis.scroll : window.scrollY;
+      setIsScrolled(y > 50);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleNativeScroll = () => updateScrolledState();
+    const handleLenisScroll = () => updateScrolledState();
+
+    window.addEventListener("scroll", handleNativeScroll, { passive: true });
+    if (lenis) {
+      lenis.on("scroll", handleLenisScroll);
+    }
+
+    updateScrolledState();
+
+    return () => {
+      window.removeEventListener("scroll", handleNativeScroll);
+      if (lenis) {
+        lenis.off("scroll", handleLenisScroll);
+      }
+    };
   }, [lenis]);
 
   return (
