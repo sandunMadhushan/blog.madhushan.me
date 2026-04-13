@@ -29,6 +29,18 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate production index.html
+        run: |
+          test -f dist/index.html
+          if grep -q '/src/main.tsx' dist/index.html; then
+            echo "Error: dist/index.html still references /src/main.tsx (dev entry)."
+            exit 1
+          fi
+          if ! grep -q '/assets/' dist/index.html; then
+            echo "Error: dist/index.html does not reference built /assets/ bundles."
+            exit 1
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
