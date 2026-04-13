@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ContentService } from "@/services/contentService";
-import type { MediumArticle } from "@/types/content";
+import type { FeaturedSelection, MediumArticle } from "@/types/content";
 import { FormEvent, useEffect, useState } from "react";
 
 export default function AdminMediumPage() {
   const [medium, setMedium] = useState<MediumArticle[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [featured, setFeatured] = useState<FeaturedSelection | null>(null);
   const [manual, setManual] = useState({
     mediumLink: "",
     title: "",
@@ -17,8 +18,12 @@ export default function AdminMediumPage() {
   });
 
   const refresh = async () => {
-    const data = await ContentService.fetchAdminMedium();
+    const [data, featuredData] = await Promise.all([
+      ContentService.fetchAdminMedium(),
+      ContentService.fetchFeaturedSelection(),
+    ]);
     setMedium(data.medium);
+    setFeatured(featuredData.featured);
   };
 
   useEffect(() => {
@@ -112,15 +117,22 @@ export default function AdminMediumPage() {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant={item.isFeatured ? "default" : "outline"}
+                variant={
+                  featured?.source === "medium" && featured.id === item.id
+                    ? "default"
+                    : "outline"
+                }
                 onClick={async () => {
-                  await ContentService.patchMedium(item.id, {
-                    isFeatured: !item.isFeatured,
+                  await ContentService.setFeaturedSelection({
+                    source: "medium",
+                    id: item.id,
                   });
                   await refresh();
                 }}
               >
-                {item.isFeatured ? "Unfeature" : "Feature"}
+                {featured?.source === "medium" && featured.id === item.id
+                  ? "Featured"
+                  : "Set Featured"}
               </Button>
               <Button
                 size="sm"

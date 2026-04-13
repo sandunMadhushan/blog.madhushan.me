@@ -41,7 +41,7 @@ const FeaturedPost = () => {
   const imageUrl =
     featuredPost?.image ??
     "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
-  const link = featuredPost?.link ?? "#";
+  const link = featuredPost?.link ?? "/admin";
 
   return (
     <section className="py-20 bg-gradient-to-br from-muted/30 to-background">

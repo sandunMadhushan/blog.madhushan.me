@@ -1,5 +1,6 @@
 export type PostStatus = "draft" | "published";
 export type FeedItemSource = "native" | "medium";
+export type FeaturedSource = "native" | "medium";
 
 export interface BlogPost {
   id: string;
@@ -42,4 +43,9 @@ export interface ContentFeedItem {
   image: string;
   link: string;
   featured: boolean;
+}
+
+export interface FeaturedSelection {
+  source: FeaturedSource;
+  id: string;
 }

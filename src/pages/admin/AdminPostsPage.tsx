@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ContentService } from "@/services/contentService";
-import type { BlogPost, PostStatus } from "@/types/content";
+import type { BlogPost, FeaturedSelection, PostStatus } from "@/types/content";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const emptyDraft = {
@@ -20,12 +20,17 @@ export default function AdminPostsPage() {
   const [editing, setEditing] = useState(emptyDraft);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [featured, setFeatured] = useState<FeaturedSelection | null>(null);
 
   const isEditing = Boolean(editing.id);
 
   const refresh = async () => {
-    const data = await ContentService.fetchAdminPosts();
+    const [data, featuredData] = await Promise.all([
+      ContentService.fetchAdminPosts(),
+      ContentService.fetchFeaturedSelection(),
+    ]);
     setPosts(data.posts);
+    setFeatured(featuredData.featured);
   };
 
   useEffect(() => {
@@ -170,6 +175,21 @@ export default function AdminPostsPage() {
                   Publish
                 </Button>
               ) : null}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  await ContentService.setFeaturedSelection({
+                    source: "native",
+                    id: post.id,
+                  });
+                  await refresh();
+                }}
+              >
+                {featured?.source === "native" && featured.id === post.id
+                  ? "Featured"
+                  : "Set Featured"}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"

@@ -1,11 +1,27 @@
-import type { BlogPost, ContentFeedItem, MediumArticle } from "@/types/content";
+import type {
+  BlogPost,
+  ContentFeedItem,
+  FeaturedSelection,
+  MediumArticle,
+} from "@/types/content";
 import { apiFetch } from "./api";
 
 export class ContentService {
   static async fetchFeed() {
-    return apiFetch<{ items: ContentFeedItem[]; featured: ContentFeedItem }>(
+    return apiFetch<{ items: ContentFeedItem[]; featured: ContentFeedItem | null }>(
       "/content-feed"
     );
+  }
+
+  static async fetchFeaturedSelection() {
+    return apiFetch<{ featured: FeaturedSelection | null }>("/admin/featured");
+  }
+
+  static async setFeaturedSelection(featured: FeaturedSelection) {
+    return apiFetch<{ featured: FeaturedSelection }>("/admin/featured", {
+      method: "PUT",
+      body: JSON.stringify(featured),
+    });
   }
 
   static async fetchPublishedPost(slug: string) {

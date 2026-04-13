@@ -13,6 +13,7 @@ import {
   extractExcerpt,
   extractImage,
   fetchMediumRss,
+  normalizeImageUrl,
   toDisplayDate,
   toSlug,
 } from "./lib/content";
@@ -63,6 +64,10 @@ const mediumPatchSchema = z.object({
   coverImage: z.string().url().nullable().optional(),
   tags: z.array(z.string()).optional(),
 });
+const featuredSchema = z.object({
+  source: z.enum(["native", "medium"]),
+  id: z.string().uuid(),
+});
 
 type DbPost = {
   id: string;
@@ -100,7 +105,7 @@ const mapPost = (post: DbPost) => ({
   title: post.title,
   excerpt: post.excerpt,
   contentMarkdown: post.content_markdown,
-  coverImage: post.cover_image,
+  coverImage: normalizeImageUrl(post.cover_image),
   tags: post.tags || [],
   status: post.status,
   publishedAt: post.published_at,
@@ -113,7 +118,7 @@ const mapMedium = (item: DbMedium) => ({
   mediumLink: item.medium_link,
   title: item.title,
   excerpt: item.excerpt,
-  coverImage: item.cover_image,
+  coverImage: normalizeImageUrl(item.cover_image),
   tags: item.tags || [],
   source: item.source,
   isHidden: item.is_hidden,
@@ -151,7 +156,7 @@ const toFeedItem = (item: DbMedium | DbPost, source: "medium" | "native") => {
         ? "5 min read"
         : estimateReadTime((item as DbPost).content_markdown),
     tags: item.tags || [],
-    image: item.cover_image || DEFAULT_COVER_IMAGE,
+    image: normalizeImageUrl(item.cover_image) || DEFAULT_COVER_IMAGE,
     link:
       source === "medium"
         ? (item as DbMedium).medium_link
@@ -164,7 +169,7 @@ async function syncMediumArticles() {
   const rssItems = await fetchMediumRss();
   for (const rssItem of rssItems) {
     const excerpt = extractExcerpt(rssItem.description);
-    const coverImage = extractImage(rssItem.description);
+    const coverImage = normalizeImageUrl(extractImage(rssItem.description));
     const tags = (rssItem.categories || []).slice(0, 5);
     await sql`
       insert into medium_articles (
@@ -219,6 +224,27 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
     return json(200, { posts: posts.map(mapPost) });
   }
 
+  if (event.httpMethod === "GET" && path === "/admin/featured") {
+    const rows = await sql<{ value: unknown }[]>`
+      select value from settings where key = 'featured_item' limit 1
+    `;
+    return json(200, { featured: rows[0]?.value ?? null });
+  }
+
+  if (event.httpMethod === "PUT" && path === "/admin/featured") {
+    const parsed = featuredSchema.safeParse(readBody(event));
+    if (!parsed.success) return json(400, { error: parsed.error.flatten() });
+    const featured = parsed.data;
+    await sql`
+      insert into settings (key, value)
+      values ('featured_item', ${JSON.stringify(featured)}::jsonb)
+      on conflict (key) do update set
+        value = excluded.value,
+        updated_at = now()
+    `;
+    return json(200, { featured });
+  }
+
   if (event.httpMethod === "POST" && path === "/admin/posts") {
     const parsed = postSchema.safeParse(readBody(event));
     if (!parsed.success) return json(400, { error: parsed.error.flatten() });
@@ -228,7 +254,9 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
     const publishedAt = status === "published" ? new Date().toISOString() : null;
     const rows = await sql<DbPost[]>`
       insert into posts (slug, title, excerpt, content_markdown, cover_image, tags, status, published_at)
-      values (${slug}, ${post.title}, ${post.excerpt}, ${post.contentMarkdown}, ${post.coverImage ?? null}, ${post.tags}, ${status}, ${publishedAt})
+      values (${slug}, ${post.title}, ${post.excerpt}, ${post.contentMarkdown}, ${normalizeImageUrl(
+      post.coverImage ?? null
+    )}, ${post.tags}, ${status}, ${publishedAt})
       returning *
     `;
     return json(201, { post: mapPost(rows[0]) });
@@ -246,7 +274,7 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
         title = ${post.title},
         excerpt = ${post.excerpt},
         content_markdown = ${post.contentMarkdown},
-        cover_image = ${post.coverImage ?? null},
+        cover_image = ${normalizeImageUrl(post.coverImage ?? null)},
         tags = ${post.tags},
         status = ${status},
         published_at = case
@@ -302,7 +330,7 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
         ${body.mediumLink},
         ${body.title},
         ${body.excerpt},
-        ${body.coverImage ?? null},
+        ${normalizeImageUrl(body.coverImage ?? null)},
         ${body.tags},
         'manual',
         ${body.publishedAt ?? null}
@@ -336,7 +364,7 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
         is_featured = coalesce(${patch.isFeatured}, is_featured),
         title = coalesce(${patch.title}, title),
         excerpt = coalesce(${patch.excerpt}, excerpt),
-        cover_image = coalesce(${patch.coverImage ?? null}, cover_image),
+        cover_image = coalesce(${normalizeImageUrl(patch.coverImage ?? null)}, cover_image),
         tags = coalesce(${patch.tags}, tags),
         manual_override_json = ${manualOverride}::jsonb
       where id = ${id}
@@ -394,20 +422,19 @@ async function handlePublic(event: HandlerEvent, path: string): Promise<HandlerR
       .sort((a, b) => b.publishedAtTs - a.publishedAtTs)
       .map(({ publishedAtTs, ...rest }) => rest);
 
+    const featuredSettingRows = await sql<{ value: unknown }[]>`
+      select value from settings where key = 'featured_item' limit 1
+    `;
+    const featuredSetting = featuredSettingRows[0]?.value as
+      | { source?: "native" | "medium"; id?: string }
+      | undefined;
+
     const featured =
-      combined.find((item) => item.featured) ||
-      combined[0] || {
-        id: "fallback",
-        source: "medium",
-        title: "No published content yet",
-        excerpt: "Use /admin to sync Medium or publish your first post.",
-        date: "Today",
-        readTime: "1 min read",
-        tags: ["Setup"],
-        image: DEFAULT_COVER_IMAGE,
-        link: "#",
-        featured: false,
-      };
+      combined.find(
+        (item) =>
+          item.id === featuredSetting?.id &&
+          item.source === featuredSetting?.source
+      ) || null;
 
     return json(200, { items: combined, featured });
   }

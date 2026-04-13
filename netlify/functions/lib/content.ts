@@ -24,7 +24,7 @@ export function extractExcerpt(description: string): string {
 
 export function extractImage(description: string): string | null {
   const imgMatch = description.match(/<img[^>]*src="([^"]*)"[^>]*>/i);
-  return imgMatch ? imgMatch[1] : null;
+  return imgMatch ? normalizeImageUrl(imgMatch[1]) : null;
 }
 
 export function estimateReadTime(content: string): string {
@@ -56,4 +56,35 @@ export async function fetchMediumRss(): Promise<RssItem[]> {
     throw new Error("Invalid Medium feed response");
   }
   return payload.items as RssItem[];
+}
+
+export function normalizeImageUrl(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const url = input.trim();
+  if (!url) return null;
+
+  // Google Drive share link formats -> direct content URL
+  // https://drive.google.com/file/d/<id>/view?usp=sharing
+  const filePathMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
+  if (filePathMatch?.[1]) {
+    return `https://drive.google.com/uc?export=view&id=${filePathMatch[1]}`;
+  }
+
+  // https://drive.google.com/open?id=<id>
+  // https://drive.google.com/uc?id=<id>
+  // https://drive.google.com/thumbnail?id=<id>&sz=w2000
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (host.includes("drive.google.com")) {
+      const id = parsed.searchParams.get("id");
+      if (id) {
+        return `https://drive.google.com/uc?export=view&id=${id}`;
+      }
+    }
+  } catch {
+    // Keep original URL if parsing fails
+  }
+
+  return url;
 }
