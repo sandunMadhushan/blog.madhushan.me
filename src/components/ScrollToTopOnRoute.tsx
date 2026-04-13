@@ -1,0 +1,18 @@
+import { useLenis } from "@/hooks/use-lenis";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+export function ScrollToTopOnRoute() {
+  const { pathname } = useLocation();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, lenis]);
+
+  return null;
+}

@@ -1,44 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sun, Moon, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useLenis } from "@/hooks/use-lenis";
+import { Menu, X, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const BlogHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
+    if (lenis) {
+      const onLenisScroll = () => {
+        setIsScrolled(lenis.scroll > 50);
+      };
+      lenis.on("scroll", onLenisScroll);
+      onLenisScroll();
+
+      return () => {
+        lenis.off("scroll", onLenisScroll);
+      };
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (isDark) {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    } else {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    }
-  };
+  }, [lenis]);
 
   return (
     <header
@@ -80,19 +69,6 @@ const BlogHeader = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="hover:bg-yellow-400/10 hover:text-yellow-400 portfolio-transition"
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </Button>
-
             <Button
               variant="ghost"
               size="icon"

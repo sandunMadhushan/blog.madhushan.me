@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import ArticleCard from "./ArticleCard";
 import { useEffect, useState } from "react";
@@ -41,7 +42,7 @@ const ArticleGrid = () => {
   if (loading) {
     return (
       <section className="py-20" id="articles">
-        <div className="container mx-auto px-6">
+        <ScrollReveal className="container mx-auto px-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <Loader2 className="w-12 h-12 animate-spin text-yellow-400 mx-auto mb-4" />
@@ -50,7 +51,7 @@ const ArticleGrid = () => {
               </p>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
     );
   }
@@ -60,7 +61,7 @@ const ArticleGrid = () => {
       className="py-20 bg-gradient-to-b from-background to-muted/20"
       id="articles"
     >
-      <div className="container mx-auto px-6">
+      <ScrollReveal className="container mx-auto px-6">
         {/* Section header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -127,7 +128,7 @@ const ArticleGrid = () => {
             Load More Articles
           </Button>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 };

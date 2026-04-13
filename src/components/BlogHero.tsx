@@ -1,13 +1,17 @@
+import { useLenis } from "@/hooks/use-lenis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowDown } from "lucide-react";
 
 const BlogHero = () => {
+  const lenis = useLenis();
+
   const scrollToArticles = () => {
-    const articlesSection = document.getElementById("articles");
-    if (articlesSection) {
-      articlesSection.scrollIntoView({ behavior: "smooth" });
+    if (lenis) {
+      lenis.scrollTo("#articles", { offset: -96 });
+      return;
     }
+    document.getElementById("articles")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -20,7 +24,7 @@ const BlogHero = () => {
       </div>
 
       <div className="container mx-auto px-6 text-center relative z-10 pt-20">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto animate-hero-float">
           {/* Main heading with gradient text */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="block text-foreground">Tech Insights &</span>
@@ -50,6 +54,7 @@ const BlogHero = () => {
             <Button
               size="lg"
               className="bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-lg font-semibold rounded-xl portfolio-transition"
+              onClick={scrollToArticles}
             >
               Latest Articles
             </Button>

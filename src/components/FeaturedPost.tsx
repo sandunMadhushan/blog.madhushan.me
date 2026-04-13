@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MediumService } from "@/services/mediumService";
 import { ArrowRight, Star } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -43,7 +44,7 @@ const FeaturedPost = () => {
 
   return (
     <section className="py-20 bg-gradient-to-br from-muted/30 to-background">
-      <div className="container mx-auto px-6">
+      <ScrollReveal className="container mx-auto px-6">
         <div className="mb-12 text-center">
           <div className="inline-flex items-center gap-2 bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 px-4 py-2 rounded-full mb-6">
             <Star className="w-4 h-4" />
@@ -104,7 +105,7 @@ const FeaturedPost = () => {
             </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 };

@@ -104,6 +104,10 @@
 }
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
+
   * {
     @apply border-border;
   }
@@ -192,9 +196,18 @@
   background: hsl(var(--portfolio-accent));
 }
 
-/* Smooth scroll behavior */
+/* Lenis: avoid native smooth scroll fighting the smooth scroller */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 /* Custom animations */
@@ -231,6 +244,49 @@ html {
 }
 .animate-delay-6 {
   animation-delay: 600ms;
+}
+
+/* Route / page entrance (portfolio-style soft fade) */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.38s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* Hero gentle float (portfolio HeroFloat-style motion) */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-hero-float {
+  animation: hero-float 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-float {
+    animation: none;
+  }
 }
 
 /* Focus styles */

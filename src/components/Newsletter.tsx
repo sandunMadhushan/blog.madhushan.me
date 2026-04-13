@@ -1,3 +1,5 @@
+import { CountUpOnView } from "@/components/CountUpOnView";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Send, Users } from "lucide-react";
@@ -12,7 +14,7 @@ const Newsletter = () => {
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto">
+        <ScrollReveal className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
               <Mail className="w-10 h-10 text-white" />
@@ -31,7 +33,9 @@ const Newsletter = () => {
             <div className="flex items-center justify-center gap-8 mb-12">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="w-5 h-5" />
-                <span className="font-semibold">500+ developers</span>
+                <span className="font-semibold">
+                  <CountUpOnView end={500} suffix="+" /> developers
+                </span>
               </div>
               <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
               <div className="text-muted-foreground">
@@ -67,7 +71,7 @@ const Newsletter = () => {
               Join the community of developers who trust my insights. Unsubscribe anytime with one click.
             </p>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
