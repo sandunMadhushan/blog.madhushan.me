@@ -82,7 +82,7 @@ export class ContentService {
   }
 
   static async syncMedium() {
-    return apiFetch<{ ok: boolean }>("/admin/medium/sync", {
+    return apiFetch<{ ok: boolean; imported: number }>("/admin/medium/sync", {
       method: "POST",
     });
   }

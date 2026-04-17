@@ -44,18 +44,68 @@ export function toDisplayDate(value: string | Date | null): string {
 }
 
 export async function fetchMediumRss(): Promise<RssItem[]> {
-  const rssUrl =
-    process.env.MEDIUM_RSS_URL ||
-    "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@sandunmadhushan";
-  const response = await fetch(rssUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Medium feed (${response.status})`);
+  const mediumFeedUrl =
+    process.env.MEDIUM_FEED_URL || "https://medium.com/feed/@sandunmadhushan";
+  try {
+    const directResponse = await fetch(mediumFeedUrl, {
+      headers: {
+        Accept: "application/rss+xml, application/xml, text/xml",
+      },
+    });
+    if (!directResponse.ok) {
+      throw new Error(`Failed to fetch direct Medium feed (${directResponse.status})`);
+    }
+    const xml = await directResponse.text();
+    const parsedItems = parseMediumRssXml(xml);
+    if (parsedItems.length > 0) return parsedItems;
+  } catch {
+    // Fallback to rss2json for compatibility in environments that block Medium XML.
   }
+
+  const rss2JsonUrl =
+    process.env.MEDIUM_RSS_URL ||
+    `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(mediumFeedUrl)}`;
+  const response = await fetch(rss2JsonUrl);
+  if (!response.ok) throw new Error(`Failed to fetch Medium feed (${response.status})`);
   const payload = await response.json();
   if (!payload || payload.status !== "ok" || !Array.isArray(payload.items)) {
-    throw new Error("Invalid Medium feed response");
+    throw new Error("Invalid Medium feed response (rss2json)");
   }
   return payload.items as RssItem[];
+}
+
+function parseMediumRssXml(xml: string): RssItem[] {
+  const itemBlocks = xml.match(/<item\b[\s\S]*?<\/item>/gi) || [];
+  return itemBlocks
+    .map((itemBlock) => {
+      const title = extractXmlTagValue(itemBlock, "title");
+      const description =
+        extractXmlTagValue(itemBlock, "description") ||
+        extractXmlTagValue(itemBlock, "content:encoded");
+      const pubDate = extractXmlTagValue(itemBlock, "pubDate");
+      const link = extractXmlTagValue(itemBlock, "link");
+      const categoryMatches = [...itemBlock.matchAll(/<category>([\s\S]*?)<\/category>/gi)];
+      const categories = categoryMatches
+        .map((match) => stripCdata(match[1]).trim())
+        .filter(Boolean);
+
+      if (!title || !description || !pubDate || !link) return null;
+      return { title, description, pubDate, link, categories };
+    })
+    .filter((item): item is RssItem => Boolean(item));
+}
+
+function extractXmlTagValue(input: string, tag: string): string {
+  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = input.match(
+    new RegExp(`<${escapedTag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${escapedTag}>`, "i")
+  );
+  if (!match?.[1]) return "";
+  return stripCdata(match[1]).trim();
+}
+
+function stripCdata(value: string): string {
+  return value.replace(/^<!\[CDATA\[/, "").replace(/\]\]>$/, "");
 }
 
 export function normalizeImageUrl(input: string | null | undefined): string | null {

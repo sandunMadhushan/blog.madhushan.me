@@ -165,7 +165,7 @@ const toFeedItem = (item: DbMedium | DbPost, source: "medium" | "native") => {
   };
 };
 
-async function syncMediumArticles() {
+async function syncMediumArticles(): Promise<number> {
   const rssItems = await fetchMediumRss();
   for (const rssItem of rssItems) {
     const excerpt = extractExcerpt(rssItem.description);
@@ -191,6 +191,7 @@ async function syncMediumArticles() {
         published_at = excluded.published_at
     `;
   }
+  return rssItems.length;
 }
 
 async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerResponse> {
@@ -315,8 +316,8 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
   }
 
   if (event.httpMethod === "POST" && path === "/admin/medium/sync") {
-    await syncMediumArticles();
-    return json(200, { ok: true });
+    const imported = await syncMediumArticles();
+    return json(200, { ok: true, imported });
   }
 
   if (event.httpMethod === "POST" && path === "/admin/medium/manual") {

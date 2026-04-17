@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/sonner";
 import { ContentService } from "@/services/contentService";
 import type { FeaturedSelection, MediumArticle } from "@/types/content";
 import { FormEvent, useEffect, useState } from "react";
@@ -54,8 +55,19 @@ export default function AdminMediumPage() {
           onClick={async () => {
             setSyncing(true);
             try {
-              await ContentService.syncMedium();
+              const result = await ContentService.syncMedium();
               await refresh();
+              toast.success("Medium sync completed", {
+                description: `Imported ${result.imported} article${
+                  result.imported === 1 ? "" : "s"
+                } from RSS.`,
+              });
+            } catch (err) {
+              const message = err instanceof Error ? err.message : "Sync failed";
+              setError(message);
+              toast.error("Medium sync failed", {
+                description: message,
+              });
             } finally {
               setSyncing(false);
             }
