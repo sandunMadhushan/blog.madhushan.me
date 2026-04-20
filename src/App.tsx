@@ -16,6 +16,7 @@ import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminMediumPage from "./pages/admin/AdminMediumPage";
 import AdminPostsPage from "./pages/admin/AdminPostsPage";
 import Index from "./pages/Index";
+import MediumArticleDetail from "./pages/MediumArticleDetail";
 import NotFound from "./pages/NotFound";
 import PostDetail from "./pages/PostDetail";
 
@@ -41,6 +42,7 @@ const App = () => (
                 <Route element={<PageFadeLayout />}>
                   <Route path="/" element={<Index />} />
                   <Route path="/posts/:slug" element={<PostDetail />} />
+                  <Route path="/articles/:slug" element={<MediumArticleDetail />} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route element={<RequireAdmin />}>
                     <Route path="/admin" element={<AdminShell />}>

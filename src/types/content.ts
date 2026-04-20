@@ -19,6 +19,7 @@ export interface BlogPost {
 export interface MediumArticle {
   id: string;
   mediumLink: string;
+  internalSlug: string;
   title: string;
   excerpt: string;
   coverImage: string | null;
@@ -30,6 +31,18 @@ export interface MediumArticle {
   manualOverride: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface MediumArticleDetail {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string | null;
+  tags: string[];
+  publishedAt: string | null;
+  mediumLink: string;
+  source: "rss" | "manual";
 }
 
 export interface ContentFeedItem {

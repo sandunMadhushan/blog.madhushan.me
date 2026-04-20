@@ -63,6 +63,11 @@ const mediumPatchSchema = z.object({
   excerpt: z.string().min(10).optional(),
   coverImage: z.string().url().nullable().optional(),
   tags: z.array(z.string()).optional(),
+  internalSlug: z
+    .string()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format")
+    .nullable()
+    .optional(),
 });
 const featuredSchema = z.object({
   source: z.enum(["native", "medium"]),
@@ -123,6 +128,7 @@ const mapMedium = (item: DbMedium) => ({
   source: item.source,
   isHidden: item.is_hidden,
   isFeatured: item.is_featured,
+  internalSlug: resolveMediumInternalSlug(item),
   manualOverride: item.manual_override_json,
   publishedAt: item.published_at,
   createdAt: item.created_at,
@@ -159,11 +165,33 @@ const toFeedItem = (item: DbMedium | DbPost, source: "medium" | "native") => {
     image: normalizeImageUrl(item.cover_image) || DEFAULT_COVER_IMAGE,
     link:
       source === "medium"
-        ? (item as DbMedium).medium_link
+        ? `/articles/${resolveMediumInternalSlug(item as DbMedium)}`
         : `/posts/${(item as DbPost).slug}`,
     featured: source === "medium" ? (item as DbMedium).is_featured : false,
   };
 };
+
+function resolveMediumInternalSlug(item: DbMedium): string {
+  const override = item.manual_override_json;
+  const overrideSlug =
+    override && typeof override === "object" && typeof override.internalSlug === "string"
+      ? toSlug(override.internalSlug)
+      : "";
+  return overrideSlug || toSlug(item.title);
+}
+
+async function assertMediumSlugUnique(slug: string, ignoreId?: string): Promise<void> {
+  const rows = await sql<
+    Pick<DbMedium, "id" | "title" | "manual_override_json">[]
+  >`select id, title, manual_override_json from medium_articles`;
+  const conflict = rows.find((row) => {
+    if (ignoreId && row.id === ignoreId) return false;
+    return resolveMediumInternalSlug(row as DbMedium) === slug;
+  });
+  if (conflict) {
+    throw new Error("Internal slug already exists");
+  }
+}
 
 async function syncMediumArticles(): Promise<number> {
   const rssItems = await fetchMediumRss();
@@ -173,7 +201,7 @@ async function syncMediumArticles(): Promise<number> {
     const tags = (rssItem.categories || []).slice(0, 5);
     await sql`
       insert into medium_articles (
-        medium_link, title, excerpt, cover_image, tags, source, published_at
+        medium_link, title, excerpt, cover_image, tags, source, manual_override_json, published_at
       ) values (
         ${rssItem.link},
         ${rssItem.title},
@@ -181,6 +209,7 @@ async function syncMediumArticles(): Promise<number> {
         ${coverImage},
         ${tags},
         'rss',
+        ${JSON.stringify({ internalSlug: toSlug(rssItem.title) })}::jsonb,
         ${new Date(rssItem.pubDate).toISOString()}
       )
       on conflict (medium_link) do update set
@@ -326,7 +355,7 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
     const body = parsed.data;
     const rows = await sql<DbMedium[]>`
       insert into medium_articles (
-        medium_link, title, excerpt, cover_image, tags, source, published_at
+        medium_link, title, excerpt, cover_image, tags, source, manual_override_json, published_at
       ) values (
         ${body.mediumLink},
         ${body.title},
@@ -334,6 +363,7 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
         ${normalizeImageUrl(body.coverImage ?? null)},
         ${body.tags},
         'manual',
+        ${JSON.stringify({ internalSlug: toSlug(body.title) })}::jsonb,
         ${body.publishedAt ?? null}
       )
       on conflict (medium_link) do update set
@@ -353,12 +383,17 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
     const parsed = mediumPatchSchema.safeParse(readBody(event));
     if (!parsed.success) return json(400, { error: parsed.error.flatten() });
     const patch = parsed.data;
-    const manualOverride = JSON.stringify({
-      title: patch.title,
-      excerpt: patch.excerpt,
-      coverImage: patch.coverImage,
-      tags: patch.tags,
-    });
+    if (patch.internalSlug) {
+      await assertMediumSlugUnique(toSlug(patch.internalSlug), id);
+    }
+    const manualOverridePatch: Record<string, unknown> = {};
+    if (patch.title !== undefined) manualOverridePatch.title = patch.title;
+    if (patch.excerpt !== undefined) manualOverridePatch.excerpt = patch.excerpt;
+    if (patch.coverImage !== undefined) manualOverridePatch.coverImage = patch.coverImage;
+    if (patch.tags !== undefined) manualOverridePatch.tags = patch.tags;
+    if (patch.internalSlug !== undefined) {
+      manualOverridePatch.internalSlug = patch.internalSlug ? toSlug(patch.internalSlug) : null;
+    }
     const rows = await sql<DbMedium[]>`
       update medium_articles set
         is_hidden = coalesce(${patch.isHidden}, is_hidden),
@@ -367,7 +402,9 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
         excerpt = coalesce(${patch.excerpt}, excerpt),
         cover_image = coalesce(${normalizeImageUrl(patch.coverImage ?? null)}, cover_image),
         tags = coalesce(${patch.tags}, tags),
-        manual_override_json = ${manualOverride}::jsonb
+        manual_override_json = coalesce(manual_override_json, '{}'::jsonb) || ${JSON.stringify(
+          manualOverridePatch
+        )}::jsonb
       where id = ${id}
       returning *
     `;
@@ -379,6 +416,30 @@ async function handleAdmin(event: HandlerEvent, path: string): Promise<HandlerRe
 }
 
 async function handlePublic(event: HandlerEvent, path: string): Promise<HandlerResponse> {
+  if (event.httpMethod === "GET" && path.startsWith("/articles/")) {
+    const slug = path.replace("/articles/", "");
+    const rows = await sql<DbMedium[]>`
+      select * from medium_articles
+      where is_hidden = false
+      order by published_at desc nulls last, created_at desc
+    `;
+    const article = rows.find((item) => resolveMediumInternalSlug(item) === slug);
+    if (!article) return json(404, { error: "Article not found" });
+    return json(200, {
+      article: {
+        id: article.id,
+        slug: resolveMediumInternalSlug(article),
+        title: article.title,
+        excerpt: article.excerpt,
+        coverImage: normalizeImageUrl(article.cover_image),
+        tags: article.tags || [],
+        publishedAt: article.published_at,
+        mediumLink: article.medium_link,
+        source: article.source,
+      },
+    });
+  }
+
   if (event.httpMethod === "GET" && path === "/posts") {
     const status = event.queryStringParameters?.status || "published";
     const posts = await sql<DbPost[]>`

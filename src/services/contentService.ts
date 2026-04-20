@@ -3,6 +3,7 @@ import type {
   ContentFeedItem,
   FeaturedSelection,
   MediumArticle,
+  MediumArticleDetail,
 } from "@/types/content";
 import { apiFetch } from "./api";
 
@@ -81,6 +82,10 @@ export class ContentService {
     return apiFetch<{ medium: MediumArticle[] }>("/admin/medium");
   }
 
+  static async fetchMediumArticleBySlug(slug: string) {
+    return apiFetch<{ article: MediumArticleDetail }>(`/articles/${slug}`);
+  }
+
   static async syncMedium() {
     return apiFetch<{ ok: boolean; imported: number }>("/admin/medium/sync", {
       method: "POST",
@@ -110,6 +115,7 @@ export class ContentService {
       excerpt?: string;
       coverImage?: string | null;
       tags?: string[];
+      internalSlug?: string | null;
     }
   ) {
     return apiFetch<{ medium: MediumArticle }>(`/admin/medium/${id}`, {

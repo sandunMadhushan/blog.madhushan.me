@@ -10,6 +10,7 @@ export default function AdminMediumPage() {
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [featured, setFeatured] = useState<FeaturedSelection | null>(null);
+  const [slugDrafts, setSlugDrafts] = useState<Record<string, string>>({});
   const [manual, setManual] = useState({
     mediumLink: "",
     title: "",
@@ -24,6 +25,12 @@ export default function AdminMediumPage() {
       ContentService.fetchFeaturedSelection(),
     ]);
     setMedium(data.medium);
+    setSlugDrafts(
+      data.medium.reduce<Record<string, string>>((acc, item) => {
+        acc[item.id] = item.internalSlug;
+        return acc;
+      }, {})
+    );
     setFeatured(featuredData.featured);
   };
 
@@ -118,45 +125,86 @@ export default function AdminMediumPage() {
         {medium.map((item) => (
           <div
             key={item.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 px-3 py-2"
+            className="space-y-3 rounded-lg border border-border/60 px-3 py-3"
           >
-            <div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
               <p className="font-medium">{item.title}</p>
               <p className="text-sm text-muted-foreground">
                 {item.source.toUpperCase()} • {item.mediumLink}
               </p>
+                <p className="text-xs text-muted-foreground">
+                  Internal URL: {window.location.origin}/articles/{item.internalSlug}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={
+                    featured?.source === "medium" && featured.id === item.id
+                      ? "default"
+                      : "outline"
+                  }
+                  onClick={async () => {
+                    await ContentService.setFeaturedSelection({
+                      source: "medium",
+                      id: item.id,
+                    });
+                    await refresh();
+                  }}
+                >
+                  {featured?.source === "medium" && featured.id === item.id
+                    ? "Featured"
+                    : "Set Featured"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={item.isHidden ? "destructive" : "outline"}
+                  onClick={async () => {
+                    await ContentService.patchMedium(item.id, {
+                      isHidden: !item.isHidden,
+                    });
+                    await refresh();
+                  }}
+                >
+                  {item.isHidden ? "Unhide" : "Hide"}
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                className="max-w-sm"
+                placeholder="internal-slug"
+                value={slugDrafts[item.id] ?? ""}
+                onChange={(e) =>
+                  setSlugDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
+                }
+              />
               <Button
                 size="sm"
-                variant={
-                  featured?.source === "medium" && featured.id === item.id
-                    ? "default"
-                    : "outline"
-                }
+                variant="outline"
                 onClick={async () => {
-                  await ContentService.setFeaturedSelection({
-                    source: "medium",
-                    id: item.id,
+                  const rawSlug = (slugDrafts[item.id] ?? "").trim();
+                  await ContentService.patchMedium(item.id, {
+                    internalSlug: rawSlug.length ? rawSlug : null,
                   });
                   await refresh();
+                  toast.success("Internal URL updated", {
+                    description: `Updated /articles/${rawSlug || item.internalSlug}`,
+                  });
                 }}
               >
-                {featured?.source === "medium" && featured.id === item.id
-                  ? "Featured"
-                  : "Set Featured"}
+                Save URL
               </Button>
               <Button
                 size="sm"
-                variant={item.isHidden ? "destructive" : "outline"}
+                variant="ghost"
                 onClick={async () => {
-                  await ContentService.patchMedium(item.id, {
-                    isHidden: !item.isHidden,
-                  });
-                  await refresh();
+                  setSlugDrafts((prev) => ({ ...prev, [item.id]: item.internalSlug }));
                 }}
               >
-                {item.isHidden ? "Unhide" : "Hide"}
+                Reset
               </Button>
             </div>
           </div>

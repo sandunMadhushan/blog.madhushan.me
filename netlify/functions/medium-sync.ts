@@ -8,7 +8,7 @@ export const handler: Handler = async () => {
     for (const item of items) {
       await sql`
         insert into medium_articles (
-          medium_link, title, excerpt, cover_image, tags, source, published_at
+          medium_link, title, excerpt, cover_image, tags, source, manual_override_json, published_at
         ) values (
           ${item.link},
           ${item.title},
@@ -16,6 +16,13 @@ export const handler: Handler = async () => {
           ${extractImage(item.description)},
           ${(item.categories || []).slice(0, 5)},
           'rss',
+          ${JSON.stringify({
+            internalSlug: item.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+              .slice(0, 120),
+          })}::jsonb,
           ${new Date(item.pubDate).toISOString()}
         )
         on conflict (medium_link) do update set
